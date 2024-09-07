@@ -1,9 +1,9 @@
+import { RouterProvider } from 'react-router-dom'
+import { RouterHooks } from './router'
+
 function App(): JSX.Element {
-  return (
-    <>
-      <h1>Ba</h1>
-    </>
-  )
+  const hookRouter = RouterHooks()
+  return <RouterProvider router={hookRouter.router} />
 }
 
 export default App
