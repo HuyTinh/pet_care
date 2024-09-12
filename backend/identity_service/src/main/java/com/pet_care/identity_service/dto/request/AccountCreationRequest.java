@@ -1,7 +1,7 @@
 package com.pet_care.identity_service.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
+import com.pet_care.identity_service.entity.Account;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
- * DTO for {@link com.pet_care.identity_service.entity.User}
+ * DTO for {@link Account}
  */
 @Getter
 @Setter
@@ -19,8 +19,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest implements Serializable {
+    @Size(min = 3, message = "USERNAME_INVALID")
     String username;
-    @Size(min = 5, message = "Password must be at less 5 characters")
+    @Size(min = 5, message = "PASSWORD_INVALID")
     String password;
     @JsonProperty("first_name")
     String firstName;
@@ -29,7 +30,7 @@ public class UserCreationRequest implements Serializable {
 
     @Pattern(regexp = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
             + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$",
-    message = "Email is not valid")
+    message = "EMAIL_INVALID")
     String email;
     LocalDate dob;
 }

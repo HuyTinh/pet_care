@@ -14,9 +14,9 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "users")
+@Entity(name = "accounts")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
+public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;

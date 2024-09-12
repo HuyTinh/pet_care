@@ -2,6 +2,7 @@ package com.pet_care.identity_service.mapper;
 
 import com.pet_care.identity_service.dto.request.UserCreationRequest;
 import com.pet_care.identity_service.dto.request.UserUpdateRequest;
+import com.pet_care.identity_service.dto.response.UserResponse;
 import com.pet_care.identity_service.entity.User;
 import org.mapstruct.*;
 
@@ -9,7 +10,7 @@ import org.mapstruct.*;
 public interface UserMapper {
     User toEntity(UserCreationRequest userCreationRequest);
 
-    UserCreationRequest toDto(User user);
+    UserResponse toDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     User partialUpdate(UserUpdateRequest userCreationRequest, @MappingTarget User user);
