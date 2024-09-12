@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * DTO for {@link Account}
@@ -18,19 +19,15 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserCreationRequest implements Serializable {
-    @Size(min = 3, message = "USERNAME_INVALID")
-    String username;
+public class AccountCreationRequest implements Serializable {
     @Size(min = 5, message = "PASSWORD_INVALID")
     String password;
-    @JsonProperty("first_name")
-    String firstName;
-    @JsonProperty("last_name")
-    String lastName;
 
     @Pattern(regexp = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
             + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$",
     message = "EMAIL_INVALID")
     String email;
-    LocalDate dob;
+
+    Set<String> roles;
+
 }

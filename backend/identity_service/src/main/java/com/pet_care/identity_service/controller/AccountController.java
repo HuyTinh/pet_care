@@ -1,12 +1,10 @@
 package com.pet_care.identity_service.controller;
 
-import com.pet_care.identity_service.dto.request.UserCreationRequest;
-import com.pet_care.identity_service.dto.request.UserUpdateRequest;
+import com.pet_care.identity_service.dto.request.AccountCreationRequest;
+import com.pet_care.identity_service.dto.request.AccountUpdateRequest;
 import com.pet_care.identity_service.dto.response.ApiResponse;
-import com.pet_care.identity_service.dto.response.UserResponse;
-import com.pet_care.identity_service.entity.User;
-import com.pet_care.identity_service.mapper.UserMapper;
-import com.pet_care.identity_service.service.UserService;
+import com.pet_care.identity_service.dto.response.AccountResponse;
+import com.pet_care.identity_service.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,45 +13,44 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("user")
+@RequestMapping("account")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AccountController {
-    UserService userService;
+    AccountService accountService;
 
     @GetMapping
-    ApiResponse<List<UserResponse>> getAllUser() {
-        return ApiResponse.<List<UserResponse>>builder().code(1000).result(userService.getAllUser()).build();
+    ApiResponse<List<AccountResponse>> getAllUser() {
+        return ApiResponse.<List<AccountResponse>>builder().code(1000).result(accountService.getAllUser()).build();
     }
 
     @GetMapping("/{id}")
-    UserResponse getUserById(@PathVariable("id") Long id) {
-        return userService.getUserById(id);
+    ApiResponse<AccountResponse> getUserById(@PathVariable("id") Long id) {
+        return ApiResponse.<AccountResponse>builder().code(1000).result(accountService.getUserById(id)).build();
     }
 
     @GetMapping("/email/{email}")
-    ApiResponse<UserResponse> getUserByEmail(@PathVariable("email") String email) {
-        return ApiResponse.<UserResponse>builder().code(1000).result(userService.getUserByEmail(email)).build();
+    ApiResponse<AccountResponse> getUserByEmail(@PathVariable("email") String email) {
+        return ApiResponse.<AccountResponse>builder().code(1000).result(accountService.getUserByEmail(email)).build();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserResponse createUser(@Valid @RequestBody UserCreationRequest request) {
-        return userService.createRequest(request);
+    ApiResponse<AccountResponse> createUser(@Valid @RequestBody AccountCreationRequest request) {
+        return ApiResponse.<AccountResponse>builder().code(1000).result(accountService.createRequest(request)).build();
     }
 
     @PutMapping("/{id}")
-    UserResponse updateUser(@PathVariable("id") Long id,@RequestBody @Valid UserUpdateRequest request) {
-        return userService.updateRequest(id, request);
+    ApiResponse<AccountResponse> updateUser(@PathVariable("id") Long id, @RequestBody @Valid AccountUpdateRequest request) {
+        return ApiResponse.<AccountResponse>builder().code(1000).result(accountService.updateRequest(id, request)).build();
     }
 
     @DeleteMapping("/{id}")
-    Map<String, String> deleteUser(@PathVariable("id") Long id) {
-        userService.deleteRequest(id);
-        return Map.of("message", "User deleted successfully");
+    ApiResponse<String> deleteUser(@PathVariable("id") Long id) {
+        accountService.deleteRequest(id);
+        return ApiResponse.<String>builder().code(1000).message("Delete account successful").build();
     }
 
 }

@@ -15,6 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     ApiResponse handlingRuntimeException(RuntimeException ex) {
+        ErrorCode errorCode = ErrorCode.valueOf(ex.getMessage());
         return ApiResponse.builder().code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode()).message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage()).build();
     }
 
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ApiResponse handlingMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        return ApiResponse.builder().code(1002).message(Objects.requireNonNull(ex.getFieldError()).getDefaultMessage()).build();
+        String enumKey = Objects.requireNonNull(ex.getFieldError()).getDefaultMessage();
+        ErrorCode errorCode = ErrorCode.INVALID_KEY;
+
+        try {
+            errorCode = ErrorCode.valueOf(enumKey);
+        } catch (IllegalArgumentException ignored) {}
+
+        return ApiResponse.builder().code(errorCode.getCode()).message(errorCode.getMessage()).build();
     }
 }
