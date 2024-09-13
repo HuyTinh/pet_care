@@ -11,6 +11,8 @@ import com.pet_care.identity_service.repository.AccountRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class AccountService {
 
     PasswordEncoder passwordEncoder;
 
+    @PostAuthorize("returnObject.email == authentication.name")
     public List<AccountResponse> getAllUser() {
         return accountRepository.findAll().stream().map(accountMapper::toDto).collect(Collectors.toList());
     }

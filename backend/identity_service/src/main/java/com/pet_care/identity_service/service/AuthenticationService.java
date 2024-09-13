@@ -9,6 +9,7 @@ import com.pet_care.identity_service.dto.request.AuthenticationRequest;
 import com.pet_care.identity_service.dto.request.IntrospectRequest;
 import com.pet_care.identity_service.dto.response.AuthenticationResponse;
 import com.pet_care.identity_service.dto.response.IntrospectResponse;
+import com.pet_care.identity_service.entity.Account;
 import com.pet_care.identity_service.exception.ErrorCode;
 import com.pet_care.identity_service.exception.IdentityException;
 import com.pet_care.identity_service.repository.AccountRepository;
@@ -20,11 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Slf4j
 @Service
@@ -65,7 +69,7 @@ public class AuthenticationService {
             throw new IdentityException(ErrorCode.UNAUTHENTICATED);
         }
 
-        var token =generateToken(request.getEmail());
+        var token =generateToken(account);
 
         return AuthenticationResponse.builder()
                 .token(token)
@@ -73,16 +77,16 @@ public class AuthenticationService {
                 .build();
     }
 
-    private String generateToken(String email) {
+    private String generateToken(Account account) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(email)
+                .subject(account.getEmail())
                 .issuer("pet_care")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()
                 ))
-                .claim("customClaim", "custom")
+                .claim("scope", buildScope(account))
                 .build();
 
 
@@ -97,5 +101,13 @@ public class AuthenticationService {
             log.error("Cannot create token", e);
             throw new IdentityException(ErrorCode.UNAUTHENTICATED);
        }
+    }
+
+    private String buildScope(Account account) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        if(!CollectionUtils.isEmpty((account.getRoles()))){
+            account.getRoles().forEach(stringJoiner::add);
+        }
+        return  stringJoiner.toString();
     }
 }

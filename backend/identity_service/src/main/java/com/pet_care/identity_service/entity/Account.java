@@ -1,12 +1,10 @@
 package com.pet_care.identity_service.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Getter
@@ -16,11 +14,13 @@ import java.util.Set;
 @Builder
 @Entity(name = "accounts")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Account extends BaseEntity {
+public class Account{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String password;
     String email;
     Set<String> roles;
+    LocalDate createdAt;
+    LocalDate updatedAt;
 }
