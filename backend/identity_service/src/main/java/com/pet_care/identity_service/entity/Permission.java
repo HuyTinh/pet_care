@@ -1,28 +1,24 @@
 package com.pet_care.identity_service.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(name = "accounts")
+@Entity(name = "permissions")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Account{
+public class Permission {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    String password;
-    String email;
-    @ManyToMany
-    Set<Role> roles;
+    String name;
+    String description;
     @JsonIgnore
     LocalDate createdAt;
     @JsonIgnore
