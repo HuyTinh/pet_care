@@ -2,6 +2,7 @@ package com.pet_care.identity_service.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pet_care.identity_service.entity.Account;
+import com.pet_care.identity_service.entity.Role;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -29,5 +30,4 @@ public class AccountCreationRequest implements Serializable {
     String email;
 
     Set<String> roles;
-
 }

@@ -8,6 +8,7 @@ import com.pet_care.identity_service.exception.ErrorCode;
 import com.pet_care.identity_service.exception.IdentityException;
 import com.pet_care.identity_service.mapper.AccountMapper;
 import com.pet_care.identity_service.repository.AccountRepository;
+import com.pet_care.identity_service.repository.RoleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +33,8 @@ public class AccountService {
 
     PasswordEncoder passwordEncoder;
 
-    @PostAuthorize("returnObject.email == authentication.name")
+    RoleRepository roleRepository;
+
     public List<AccountResponse> getAllUser() {
         return accountRepository.findAll().stream().map(accountMapper::toDto).collect(Collectors.toList());
     }
@@ -42,6 +45,9 @@ public class AccountService {
 
         Account account = accountMapper.toEntity(request);
         account.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        account.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoles())));
+
         return accountMapper.toDto(accountRepository.save(account));
     }
 
@@ -54,6 +60,7 @@ public class AccountService {
         accountRepository.deleteById(id);
     }
 
+    @PostAuthorize("returnObject.email == authentication.name || hasRole('HOSPITAL_ADMINISTRATOR')")
     public AccountResponse getUserById(Long id) {
         return accountMapper
                 .toDto(accountRepository

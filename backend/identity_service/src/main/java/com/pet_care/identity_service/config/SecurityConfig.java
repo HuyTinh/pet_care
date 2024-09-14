@@ -36,6 +36,8 @@ public class SecurityConfig {
                         "/account",
                         "/auth/token",
                         "/auth/introspect",
+                        "/role",
+                        "/permission"
                     },
 "GET", new String[]{});
 

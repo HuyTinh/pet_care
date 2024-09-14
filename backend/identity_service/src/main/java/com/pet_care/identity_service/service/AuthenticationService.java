@@ -10,6 +10,7 @@ import com.pet_care.identity_service.dto.request.IntrospectRequest;
 import com.pet_care.identity_service.dto.response.AuthenticationResponse;
 import com.pet_care.identity_service.dto.response.IntrospectResponse;
 import com.pet_care.identity_service.entity.Account;
+import com.pet_care.identity_service.entity.Role;
 import com.pet_care.identity_service.exception.ErrorCode;
 import com.pet_care.identity_service.exception.IdentityException;
 import com.pet_care.identity_service.repository.AccountRepository;
@@ -106,7 +107,14 @@ public class AuthenticationService {
     private String buildScope(Account account) {
         StringJoiner stringJoiner = new StringJoiner(" ");
         if(!CollectionUtils.isEmpty((account.getRoles()))){
-            account.getRoles().forEach(stringJoiner::add);
+            account.getRoles().forEach(
+                    role -> {
+                        stringJoiner.add(role.getName());
+                        if(!CollectionUtils.isEmpty(role.getPermissions())) {
+                            role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
+                        }
+                    }
+            );
         }
         return  stringJoiner.toString();
     }

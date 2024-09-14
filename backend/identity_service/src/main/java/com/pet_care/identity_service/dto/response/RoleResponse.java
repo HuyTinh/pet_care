@@ -1,10 +1,8 @@
 package com.pet_care.identity_service.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 @Getter
@@ -13,9 +11,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AccountResponse {
-    String id;
-    String email;
-
-    Set<RoleResponse> roles;
+public class RoleResponse {
+    String name;
+    String description;
+    Set<PermissionResponse> permissions;
 }
