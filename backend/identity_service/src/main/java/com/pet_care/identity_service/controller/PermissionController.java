@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,21 +21,31 @@ import java.util.List;
 public class PermissionController {
     PermissionService permissionService;
 
-    @PostMapping
-    ApiResponse<PermissionResponse> createPermission(@RequestBody PermissionRequest permissionRequest) {
-        return ApiResponse.<PermissionResponse>builder()
-                .result(permissionService.create(permissionRequest))
-                .build();
-    }
-
     @GetMapping
+    @PreAuthorize("hasRole('HOSPITAL_ADMINISTRATOR')")
     ApiResponse<List<PermissionResponse>> getAllPermission() {
         return ApiResponse.<List<PermissionResponse>>builder()
                 .result(permissionService.getAll())
                 .build();
     }
 
+    @PostMapping
+    @PreAuthorize("hasRole('HOSPITAL_ADMINISTRATOR')")
+    ApiResponse<PermissionResponse> createPermission(@RequestBody PermissionRequest permissionRequest) {
+        return ApiResponse.<PermissionResponse>builder()
+                .result(permissionService.create(permissionRequest))
+                .build();
+    }
+
+    @PutMapping("/{permission}")
+    ApiResponse<PermissionResponse> updatePermission(@PathVariable("permission") String permission , @RequestBody PermissionRequest permissionRequest) {
+        return ApiResponse.<PermissionResponse>builder()
+                .result(permissionService.update(permission, permissionRequest))
+                .build();
+    }
+
     @DeleteMapping("/{permission}")
+    @PreAuthorize("hasRole('HOSPITAL_ADMINISTRATOR')")
     ApiResponse<Void> deletePermission(@PathVariable("permission") String permission) {
         permissionService.delete(permission);
         return ApiResponse.<Void>builder().build();

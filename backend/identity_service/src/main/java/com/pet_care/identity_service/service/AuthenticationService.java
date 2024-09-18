@@ -7,19 +7,23 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.pet_care.identity_service.dto.request.AuthenticationRequest;
 import com.pet_care.identity_service.dto.request.IntrospectRequest;
+import com.pet_care.identity_service.dto.request.LogoutRequest;
+import com.pet_care.identity_service.dto.request.RefreshRequest;
 import com.pet_care.identity_service.dto.response.AuthenticationResponse;
 import com.pet_care.identity_service.dto.response.IntrospectResponse;
-import com.pet_care.identity_service.entity.Account;
-import com.pet_care.identity_service.entity.Role;
 import com.pet_care.identity_service.exception.ErrorCode;
 import com.pet_care.identity_service.exception.IdentityException;
+import com.pet_care.identity_service.model.Account;
+import com.pet_care.identity_service.model.InvalidatedToken;
 import com.pet_care.identity_service.repository.AccountRepository;
+import com.pet_care.identity_service.repository.InvalidatedTokenRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -27,9 +31,9 @@ import org.springframework.util.CollectionUtils;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Date;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -38,7 +42,9 @@ import java.util.StringJoiner;
 public class AuthenticationService {
     AccountRepository accountRepository;
 
-    PasswordEncoder passwordEncoder;
+    InvalidatedTokenRepository invalidatedTokenRepository;
+
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -47,17 +53,17 @@ public class AuthenticationService {
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
 
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY);
+        boolean validToken = true;
 
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
+       try {
+           verifyToken(token);
+       } catch (IdentityException e){
+           validToken = false;
+       }
 
         return IntrospectResponse
                 .builder()
-                .valid(verified && expiryTime.after(new Date()))
+                .valid(validToken)
                 .build();
     }
 
@@ -84,8 +90,9 @@ public class AuthenticationService {
                 .subject(account.getEmail())
                 .issuer("pet_care")
                 .issueTime(new Date())
+                .jwtID(UUID.randomUUID().toString())
                 .expirationTime(new Date(
-                        Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()
+                        Instant.now().plus(10, ChronoUnit.MINUTES).toEpochMilli()
                 ))
                 .claim("scope", buildScope(account))
                 .build();
@@ -104,12 +111,73 @@ public class AuthenticationService {
        }
     }
 
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signJWT = verifyToken(request.getToken());
+
+        var jit =signJWT.getJWTClaimsSet().getJWTID();
+        var expirationTime = signJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken
+                .builder()
+                .id(jit)
+                .expriryDate(expirationTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        var email = signJWT.getJWTClaimsSet().getSubject();
+
+        var account = accountRepository.findByEmail(email).orElseThrow(() -> new IdentityException(ErrorCode.USER_NOT_EXISTED));
+
+        var token = generateToken(account);
+
+        return AuthenticationResponse.builder().token(token).isAuthenticated(true).build();
+    }
+
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+
+        Date expirationTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken
+                .builder()
+                .id(jit)
+                .expriryDate(expirationTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY);
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if(!(verified && expiryTime.after(new Date()))){
+            throw new IdentityException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        invalidatedTokenRepository.findById(signedJWT.getJWTClaimsSet().getJWTID()).ifPresent(invalidatedToken -> {
+            throw new IdentityException(ErrorCode.UNAUTHENTICATED);
+        });
+
+        return signedJWT;
+    }
+
     private String buildScope(Account account) {
         StringJoiner stringJoiner = new StringJoiner(" ");
         if(!CollectionUtils.isEmpty((account.getRoles()))){
             account.getRoles().forEach(
                     role -> {
-                        stringJoiner.add(role.getName());
+                        stringJoiner.add("ROLE_"+role.getName());
                         if(!CollectionUtils.isEmpty(role.getPermissions())) {
                             role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
                         }

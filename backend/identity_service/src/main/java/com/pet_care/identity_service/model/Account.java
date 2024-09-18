@@ -1,4 +1,4 @@
-package com.pet_care.identity_service.entity;
+package com.pet_care.identity_service.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

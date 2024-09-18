@@ -3,17 +3,16 @@ package com.pet_care.identity_service.service;
 import com.pet_care.identity_service.dto.request.AccountCreationRequest;
 import com.pet_care.identity_service.dto.request.AccountUpdateRequest;
 import com.pet_care.identity_service.dto.response.AccountResponse;
-import com.pet_care.identity_service.entity.Account;
 import com.pet_care.identity_service.exception.ErrorCode;
 import com.pet_care.identity_service.exception.IdentityException;
 import com.pet_care.identity_service.mapper.AccountMapper;
+import com.pet_care.identity_service.model.Account;
 import com.pet_care.identity_service.repository.AccountRepository;
 import com.pet_care.identity_service.repository.RoleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,7 @@ public class AccountService {
 
     AccountMapper accountMapper;
 
-    PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     RoleRepository roleRepository;
 
@@ -62,17 +61,20 @@ public class AccountService {
 
     @PostAuthorize("returnObject.email == authentication.name || hasRole('HOSPITAL_ADMINISTRATOR')")
     public AccountResponse getUserById(Long id) {
+//        var authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        authentication.getAuthorities().forEach(grantedAuthority -> System.out.println(grantedAuthority.getAuthority()));
         return accountMapper
                 .toDto(accountRepository
                         .findById(id)
-                        .orElseThrow(() -> new RuntimeException("Account not found")));
+                        .orElseThrow(() -> new IdentityException(ErrorCode.USER_NOT_EXISTED)));
     }
 
     public AccountResponse getUserByEmail(String email) {
         return accountMapper
                 .toDto(accountRepository
                         .findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("Account not found")));
+                        .orElseThrow(() -> new IdentityException(ErrorCode.USER_NOT_EXISTED)));
     }
 
 }

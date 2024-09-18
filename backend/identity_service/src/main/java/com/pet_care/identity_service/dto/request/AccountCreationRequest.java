@@ -1,15 +1,12 @@
 package com.pet_care.identity_service.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.pet_care.identity_service.entity.Account;
-import com.pet_care.identity_service.entity.Role;
+import com.pet_care.identity_service.model.Account;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Set;
 
 /**

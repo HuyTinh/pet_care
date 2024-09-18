@@ -2,8 +2,8 @@ package com.pet_care.identity_service.controller;
 
 import com.pet_care.identity_service.dto.request.AccountCreationRequest;
 import com.pet_care.identity_service.dto.request.AccountUpdateRequest;
-import com.pet_care.identity_service.dto.response.ApiResponse;
 import com.pet_care.identity_service.dto.response.AccountResponse;
+import com.pet_care.identity_service.dto.response.ApiResponse;
 import com.pet_care.identity_service.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +25,7 @@ public class AccountController {
     AccountService accountService;
 
     @GetMapping
+    @PreAuthorize("hasRole('HOSPITAL_ADMINISTRATOR')")
     ApiResponse<List<AccountResponse>> getAllUser() {
         return ApiResponse.<List<AccountResponse>>builder().code(1000).result(accountService.getAllUser()).build();
     }
@@ -51,6 +52,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('HOSPITAL_ADMINISTRATOR')")
     ApiResponse<String> deleteUser(@PathVariable("id") Long id) {
         accountService.deleteRequest(id);
         return ApiResponse.<String>builder().code(1000).message("Delete account successful").build();

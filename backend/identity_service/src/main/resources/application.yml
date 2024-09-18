@@ -17,7 +17,7 @@ spring:
 server:
   port: 8801
   servlet:
-    context-path: /api/v1/identity
+    context-path: /api/v1
 
 jwt:
   signerKey: "xyrDapo8+iQ7k9vh/zGyUYIsOgI487NM9mAZbuh4fNJdzjVkWcEMeUR3/v0hEQGt"

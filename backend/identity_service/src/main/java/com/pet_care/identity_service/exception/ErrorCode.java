@@ -20,8 +20,10 @@ public enum ErrorCode {
     USER_NOT_EXISTED(1006, "Account isn't exist", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1007, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1008, "You don't have permission", HttpStatus.FORBIDDEN),
-    ROLE_NOT_EXISTED(1006, "Role isn't exist", HttpStatus.NOT_FOUND),
-    ROLE_EXISTED(1002, "Role exist", HttpStatus.BAD_REQUEST),;
+    ROLE_NOT_EXISTED(1009, "Role isn't exist", HttpStatus.NOT_FOUND),
+    ROLE_EXISTED(1010, "Role exist", HttpStatus.BAD_REQUEST),
+    TOKEN_HAS_EXPIRED(1011, "Token has expired", HttpStatus.UNAUTHORIZED),
+    PERMISSION_NOT_FOUND(1012, "Permission not found", HttpStatus.NOT_FOUND);
 
     int code;
     String message;
