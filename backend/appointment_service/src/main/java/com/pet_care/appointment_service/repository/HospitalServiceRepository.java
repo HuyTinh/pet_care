@@ -1,4 +1,9 @@
 package com.pet_care.appointment_service.repository;
 
-public interface HospitalServiceRepository extends org.springframework.data.jpa.repository.JpaRepository<com.pet_care.appointment_service.entity.HospitalService, java.lang.Long> {
-  }
+import com.pet_care.appointment_service.model.HospitalServiceEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface HospitalServiceRepository extends JpaRepository<HospitalServiceEntity, String> {
+}

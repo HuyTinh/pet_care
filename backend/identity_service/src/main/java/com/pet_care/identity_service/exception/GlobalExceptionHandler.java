@@ -19,7 +19,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode()).body(ApiResponse.builder().code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode()).message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage()).build());
     }
 
-
     @ExceptionHandler(IdentityException.class)
     ResponseEntity<ApiResponse> handlingIdentityException(IdentityException ex) {
         ErrorCode errorCode = ex.getErrorCode();
