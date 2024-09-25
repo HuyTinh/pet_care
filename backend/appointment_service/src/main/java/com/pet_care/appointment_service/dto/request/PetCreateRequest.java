@@ -1,4 +1,4 @@
-package com.pet_care.customer_service.dto.request;
+package com.pet_care.appointment_service.dto.request;
 
 
 import lombok.*;
@@ -10,7 +10,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PetRequest {
+public class PetCreateRequest {
+    Long id;
+
     String name;
 
     String age;

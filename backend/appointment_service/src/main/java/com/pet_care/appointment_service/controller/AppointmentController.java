@@ -27,6 +27,13 @@ public class AppointmentController {
                 .build();
     }
 
+    @GetMapping("/account/{accountId}")
+    public ApiResponse<List<AppointmentResponse>> getAllByAccountId(@PathVariable("accountId") Long accountId) throws JsonProcessingException {
+        return ApiResponse.<List<AppointmentResponse>>builder()
+                .result(appointmentService.getByAccountId(accountId))
+                .build();
+    }
+
     @PostMapping
     public ApiResponse<AppointmentResponse> create(@RequestBody AppointmentRequest appointmentRequest) throws JsonProcessingException {
         return ApiResponse.<AppointmentResponse>builder()

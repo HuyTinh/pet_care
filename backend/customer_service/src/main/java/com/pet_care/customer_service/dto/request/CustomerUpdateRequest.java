@@ -1,20 +1,16 @@
-package com.pet_care.customer_service.dto.response;
+package com.pet_care.customer_service.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class CustomerResponse {
-    Long id;
-
+public class CustomerUpdateRequest {
     @JsonProperty("first_name")
     String firstName;
 
@@ -23,9 +19,4 @@ public class CustomerResponse {
 
     @JsonProperty("phone_number")
     String phoneNumber;
-
-    String email;
-
-    @JsonProperty("account_id")
-    Long accountId;
 }

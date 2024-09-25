@@ -1,15 +1,17 @@
-package com.pet_care.customer_service.model;
+package com.pet_care.appointment_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @Builder
-@Entity(name = "pets")
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity(name = "pets")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Pet {
     @Id
@@ -25,6 +27,6 @@ public class Pet {
     String species;
 
     @ManyToOne
-    @JoinColumn(name="customer_id")
-    Customer customer;
+    @JoinColumn(name = "appointment_id")
+    Appointment appointment;
 }

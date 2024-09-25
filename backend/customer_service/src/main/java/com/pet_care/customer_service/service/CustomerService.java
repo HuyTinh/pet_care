@@ -2,7 +2,8 @@ package com.pet_care.customer_service.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pet_care.customer_service.dto.request.CustomerRequest;
+import com.pet_care.customer_service.dto.request.AppointmentCreateRequest;
+import com.pet_care.customer_service.dto.request.CustomerCreateRequest;
 import com.pet_care.customer_service.dto.request.sub.AppointmentRequest;
 import com.pet_care.customer_service.dto.response.CustomerResponse;
 import com.pet_care.customer_service.exception.CustomerException;
@@ -13,6 +14,7 @@ import com.pet_care.customer_service.repository.CustomerRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,20 +40,39 @@ public class CustomerService {
         return customerRepository.findById(id).map(customerMapper::toDto).orElseThrow(() -> new RuntimeException(("")));
     }
 
-    public CustomerResponse addCustomer(CustomerRequest customerRequest) throws JsonProcessingException {
-        Customer customerSave = customerRepository.save(customerMapper.toEntity(customerRequest));
+    public CustomerResponse getCustomerByAccountId(Long accountId) {
+        return customerRepository.findByAccountId(accountId).map(customerMapper::toDto).orElseThrow(() -> new CustomerException(ErrorCode.EMAIL_NOT_FOUND));
+    }
 
-        AppointmentRequest appointmentRequest = customerRequest.getAppointment();
+//    public CustomerResponse addCustomer(CustomerRequest customerRequest) throws JsonProcessingException {
+//        Customer customerSave = customerRepository.save(customerMapper.toEntity(customerRequest));
+//        return customerMapper.toDto(customerRepository.save(customerSave));
+//    }
+
+    @JmsListener(destination = "customer-create-queue")
+    public void addCustomerFromMessageQueue(String customerRequest) throws JsonProcessingException {
+        customerRepository.save(customerMapper.toEntity(objectMapper.readValue(customerRequest, CustomerCreateRequest.class)));
+    }
+
+    public CustomerResponse createAppointment(AppointmentCreateRequest request) throws JsonProcessingException {
+        Customer customerSave = customerRepository.findByAccountId(request.getAccountId()).orElse(null);
+
+        if(customerSave == null) {
+            customerSave = customerRepository.save(customerMapper.toEntity(request));
+        }
+
+        AppointmentRequest appointmentRequest = request.getAppointment();
 
         appointmentRequest.setCustomerId(customerSave.getId());
 
-        messageService.sendMessageQueue("customer-create-appointment", objectMapper.writeValueAsString(customerRequest.getAppointment()));
+        messageService.sendMessageQueue("customer-create-appointment", objectMapper.writeValueAsString(appointmentRequest));
 
         return customerMapper.toDto(customerRepository.save(customerSave));
     }
 
-    public CustomerResponse updateCustomer(Long id, CustomerRequest customerRequest) {
-        Customer existingCustomer = customerRepository.findById(id).orElseThrow(() -> new CustomerException(ErrorCode.CUSTOMER_NOT_FOUND));
+
+    public CustomerResponse updateCustomer(Long accountId, CustomerCreateRequest customerRequest) {
+        Customer existingCustomer = customerRepository.findByAccountId(accountId).orElseThrow(() -> new CustomerException(ErrorCode.CUSTOMER_NOT_FOUND));
         customerMapper.partialUpdate(customerRequest, existingCustomer);
         return customerMapper.toDto(customerRepository.save(existingCustomer));
     }

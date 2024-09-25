@@ -28,4 +28,6 @@ public class AppointmentRequest {
 
     @Enumerated(EnumType.STRING)
     AppointmentStatus status;
+
+    Set<PetCreateRequest> pets;
 }

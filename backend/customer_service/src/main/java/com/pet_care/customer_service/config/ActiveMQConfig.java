@@ -4,10 +4,6 @@ import jakarta.jms.ConnectionFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-
-import java.util.ArrayDeque;
-import java.util.Queue;
 
 @Configuration
 public class ActiveMQConfig {

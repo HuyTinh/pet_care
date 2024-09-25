@@ -8,9 +8,12 @@ import com.pet_care.appointment_service.enums.AppointmentStatus;
 import com.pet_care.appointment_service.exception.AppointmentException;
 import com.pet_care.appointment_service.exception.ErrorCode;
 import com.pet_care.appointment_service.mapper.AppointmentMapper;
+import com.pet_care.appointment_service.mapper.PetMapper;
 import com.pet_care.appointment_service.model.Appointment;
+import com.pet_care.appointment_service.model.Pet;
 import com.pet_care.appointment_service.repository.AppointmentRepository;
 import com.pet_care.appointment_service.repository.HospitalServiceRepository;
+import com.pet_care.appointment_service.repository.PetRepository;
 import com.pet_care.appointment_service.repository.httpClient.CustomerClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,17 +46,25 @@ public class AppointmentService {
     ObjectMapper objectMapper;
 
     CustomerClient customerClient;
+    private final PetRepository petRepository;
+    private final PetMapper petMapper;
 
     public AppointmentResponse create(AppointmentRequest appointmentRequest) throws JsonProcessingException {
         Appointment appointment = appointmentMapper.toEntity(appointmentRequest);
 
         appointment.setServices(new HashSet<>(hospitalServiceRepository.findAllById(appointmentRequest.getServices())));
 
+
         if(appointmentRequest.getStatus() == null){
             appointment.setStatus(AppointmentStatus.PENDING);
         }
 
+
         Appointment createSuccess = appointmentRepository.save(appointment);
+
+        Set<Pet> pets = appointmentRequest.getPets().stream().map(petMapper::toEntity).collect(Collectors.toSet()).stream().peek(pet -> pet.setAppointment(createSuccess)).collect(Collectors.toSet());
+
+        petRepository.saveAll(pets);
 
         String createAppointmentStatus = createSuccess.getStatus().name();
         AppointmentResponse appointmentResponse = appointmentMapper.toDto(appointment);
@@ -76,7 +88,8 @@ public class AppointmentService {
 
         return appointments.stream().map(appointment -> {
             AppointmentResponse appointmentResponse = appointmentMapper.toDto(appointment);
-            appointmentResponse.setCustomer(customerClient.getCustomer(String.valueOf(appointment.getCustomerId())).getResult());
+            appointmentResponse.setPets(petRepository.findByAppointment_Id(appointment.getId()).stream().map(petMapper::toDto).collect(Collectors.toSet()));
+//            appointmentResponse.setCustomer(customerClient.getCustomer(String.valueOf(appointment.getCustomerId())).getResult());
             return appointmentResponse;
         }).toList();
     }
@@ -87,6 +100,17 @@ public class AppointmentService {
                 .toDto(appointmentRepository
                 .findById(appointment)
                 .orElseThrow(() -> new AppointmentException(ErrorCode.APPOINTMENT_NOT_FOUND)));
+    }
+
+    @Transactional
+    public List<AppointmentResponse> getByAccountId(Long accountId) {
+        Long customerId = customerClient.getCustomerByAccountId(String.valueOf(accountId)).getResult().getId();
+        return appointmentRepository
+                        .findAllByCustomerId(customerId).stream().map(appointment -> {
+                            AppointmentResponse appointmentResponse = appointmentMapper.toDto(appointment);
+                            appointmentResponse.setPets(new HashSet<>(petRepository.findByAppointment_Id(appointment.getId())).stream().map(petMapper::toDto).collect(Collectors.toSet()));
+                            return appointmentResponse;
+                }).collect(Collectors.toList());
     }
 
     public int checkInAppointment(Long appointmentId) {

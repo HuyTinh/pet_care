@@ -1,9 +1,11 @@
 package com.pet_care.identity_service.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.pet_care.identity_service.dto.request.AccountCreationRequest;
 import com.pet_care.identity_service.dto.request.AccountUpdateRequest;
 import com.pet_care.identity_service.dto.response.AccountResponse;
 import com.pet_care.identity_service.dto.response.ApiResponse;
+import com.pet_care.identity_service.dto.response.AuthenticationResponse;
 import com.pet_care.identity_service.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -40,10 +42,16 @@ public class AccountController {
         return ApiResponse.<AccountResponse>builder().code(1000).result(accountService.getUserByEmail(email)).build();
     }
 
-    @PostMapping
+//    @PostMapping
+//    @ResponseStatus(HttpStatus.CREATED)
+//    ApiResponse<AccountResponse> createUser(@Valid @RequestBody AccountCreationRequest request) {
+//        return ApiResponse.<AccountResponse>builder().code(1000).result(accountService.createRequest(request)).build();
+//    }
+
+    @PostMapping("/generate-token")
     @ResponseStatus(HttpStatus.CREATED)
-    ApiResponse<AccountResponse> createUser(@Valid @RequestBody AccountCreationRequest request) {
-        return ApiResponse.<AccountResponse>builder().code(1000).result(accountService.createRequest(request)).build();
+    ApiResponse<AuthenticationResponse> createUserAndGenerateToken(@Valid @RequestBody AccountCreationRequest request) throws JsonProcessingException {
+        return ApiResponse.<AuthenticationResponse>builder().code(1000).result(accountService.createRequest(request)).build();
     }
 
     @PutMapping("/{id}")

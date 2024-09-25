@@ -28,4 +28,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, String
 
     @Query(value = "SELECT EXISTS (SELECT TRUE FROM appointments WHERE status = 'CHECKED_IN' And id = ?1)")
     int checkInAppointmentIsExist(Long id);
+
+    List<Appointment> findAllByCustomerId(Long customerId);
 }

@@ -24,4 +24,6 @@ public class AppointmentRequest {
     Date appointmentDate;
 
     String status;
+
+    Set<PetCreateRequest> pets;
 }

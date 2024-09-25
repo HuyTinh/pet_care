@@ -68,12 +68,12 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        var account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new IdentityException(ErrorCode.USER_NOT_EXISTED));
+        var account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new IdentityException(ErrorCode.EMAIL_NOT_EXISTED));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), account.getPassword());
 
         if(!authenticated) {
-            throw new IdentityException(ErrorCode.UNAUTHENTICATED);
+            throw new IdentityException(ErrorCode.PASSWORD_NOT_CORRECT);
         }
 
         var token =generateToken(account);
@@ -95,6 +95,7 @@ public class AuthenticationService {
                         Instant.now().plus(10, ChronoUnit.MINUTES).toEpochMilli()
                 ))
                 .claim("scope", buildScope(account))
+                .claim("userId", account.getId())
                 .build();
 
 
@@ -127,7 +128,7 @@ public class AuthenticationService {
 
         var email = signJWT.getJWTClaimsSet().getSubject();
 
-        var account = accountRepository.findByEmail(email).orElseThrow(() -> new IdentityException(ErrorCode.USER_NOT_EXISTED));
+        var account = accountRepository.findByEmail(email).orElseThrow(() -> new IdentityException(ErrorCode.EMAIL_NOT_EXISTED));
 
         var token = generateToken(account);
 

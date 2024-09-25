@@ -1,6 +1,8 @@
 package com.pet_care.appointment_service.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pet_care.appointment_service.dto.request.PetCreateRequest;
 import com.pet_care.appointment_service.enums.AppointmentStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AppointmentResponse {
     Long id;
 
@@ -25,4 +28,6 @@ public class AppointmentResponse {
     Set<HospitalServiceResponse> services;
 
     AppointmentStatus status;
+
+    Set<PetResponse> pets;
 }

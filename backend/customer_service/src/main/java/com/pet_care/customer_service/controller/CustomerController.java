@@ -1,7 +1,8 @@
 package com.pet_care.customer_service.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.pet_care.customer_service.dto.request.CustomerRequest;
+import com.pet_care.customer_service.dto.request.AppointmentCreateRequest;
+import com.pet_care.customer_service.dto.request.CustomerCreateRequest;
 import com.pet_care.customer_service.dto.response.ApiResponse;
 import com.pet_care.customer_service.dto.response.CustomerResponse;
 import com.pet_care.customer_service.service.CustomerService;
@@ -27,17 +28,18 @@ public class CustomerController {
                 .build();
     }
 
-    @PostMapping
-    public ApiResponse<CustomerResponse> addCustomer(@RequestBody CustomerRequest customerRequest) throws JsonProcessingException {
+    @PostMapping("/create-appointment")
+    public ApiResponse<CustomerResponse> createAppointment(@RequestBody AppointmentCreateRequest request) throws JsonProcessingException {
         return ApiResponse.<CustomerResponse>builder()
-                .result(customerService.addCustomer(customerRequest))
+                .result(customerService.createAppointment(request))
                 .build();
     }
 
-    @PutMapping("/{customerId}")
-    public ApiResponse<CustomerResponse> updateCustomer(@PathVariable Long customerId, @RequestBody CustomerRequest customerRequest) {
+    @PutMapping("/account/{accountId}")
+    public ApiResponse<CustomerResponse> updateCustomer(@PathVariable("accountId") Long accountId, @RequestBody CustomerCreateRequest
+            customerRequest) {
         return ApiResponse.<CustomerResponse>builder()
-                .result(customerService.updateCustomer(customerId, customerRequest))
+                .result(customerService.updateCustomer(accountId,  customerRequest))
                 .build();
     }
 
@@ -45,6 +47,13 @@ public class CustomerController {
     public ApiResponse<CustomerResponse> getCustomerById(@PathVariable("customerId") Long customerId) {
         return ApiResponse.<CustomerResponse>builder()
                 .result(customerService.getCustomerById(customerId))
+                .build();
+    }
+
+    @GetMapping("/account/{accountId}")
+    public ApiResponse<CustomerResponse> getCustomerByAccountId(@PathVariable("accountId") Long accountId) {
+        return ApiResponse.<CustomerResponse>builder()
+                .result(customerService.getCustomerByAccountId(accountId))
                 .build();
     }
 
